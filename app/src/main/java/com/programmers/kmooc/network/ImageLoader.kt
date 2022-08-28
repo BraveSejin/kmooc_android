@@ -10,29 +10,26 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 object ImageLoader {
+    private val cache = mutableMapOf<String, Bitmap>()
+
     fun loadImage(url: String, completed: (Bitmap?) -> Unit) {
+        if (cache.containsKey(url)) {
+            completed(cache[url])
+            return
+        }
         GlobalScope.launch(Dispatchers.IO) {
-            val bitmapJob = async { convertUrlToBitmap(url) }
-            MainScope().launch(Dispatchers.Main) {
-                completed(bitmapJob.await())
+            try {
+                val bitmap = BitmapFactory.decodeStream(URL(url).openStream())
+                cache[url] = bitmap
+                launch(Dispatchers.Main) {
+                    completed(bitmap)
+                }
+
+            } catch (e: Exception) {
+                launch(Dispatchers.Main) {
+                    completed(null)
+                }
             }
         }
-    }
-
-
-    private fun convertUrlToBitmap(url: String): Bitmap? {
-        try {
-            val url = URL(url)
-            val conn = url.openConnection() as HttpURLConnection
-            conn.doInput = true
-            conn.connect()
-            val input = conn.inputStream
-            val bitmap = BitmapFactory.decodeStream(input)
-            return bitmap
-        } catch (e: IOException) {
-            Log.e("", "convertUrlToBitmap: $url")
-        }
-        return null
-
     }
 }

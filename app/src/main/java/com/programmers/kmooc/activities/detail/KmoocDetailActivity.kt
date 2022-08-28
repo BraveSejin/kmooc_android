@@ -44,9 +44,10 @@ class KmoocDetailActivity : AppCompatActivity() {
         viewModel.lecture.observe(this) {
             binding.apply {
 
-                ImageLoader.loadImage(it.courseImageLarge, { it ->
+                ImageLoader.loadImage(it.courseImageLarge) { it ->
+//                    lectureImage.setImageBitmap(it)
                     lectureImage.setImageBitmap(it)
-                })
+                }
 
                 lectureNumber.setDescription(title = "강좌번호", description = it.number)
                 lectureType.setDescription(title = "강좌분류", description = it.classfyName)
@@ -54,7 +55,7 @@ class KmoocDetailActivity : AppCompatActivity() {
                 lectureTeachers.setDescription(title = "교수정보", description = it.teachers ?: "")
                 lectureDue.setDescription(
                     title = "강좌기관",
-                    description = DateUtil.formatDate(it.start) + "~" + DateUtil.formatDate((it.end))
+                    description = DateUtil.formatDueString(it.start, it.end)
                 )
                 webView.settings.javaScriptEnabled = true
                 webView.loadData(it.overview, "text/html; charset=utf-8", "UTF-8")

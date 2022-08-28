@@ -32,6 +32,8 @@ class KmoocListActivity : AppCompatActivity() {
 
         binding = ActivityKmookListBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.viewmodel = viewModel
+        binding.lifecycleOwner = this
 
         binding.pullToRefresh.apply {
             setOnRefreshListener {
@@ -43,20 +45,20 @@ class KmoocListActivity : AppCompatActivity() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
+                val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val lastVisibleItemPosition =
-                    (recyclerView.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
-                val itemTotalCount = recyclerView.adapter?.itemCount
-                if (lastVisibleItemPosition + 1 == itemTotalCount) {
+                    linearLayoutManager.findLastCompletelyVisibleItemPosition()
 
+                if (viewModel.processing.value == true) return
+                if (!viewModel.hasNext()) return
+
+                if (linearLayoutManager.itemCount <= lastVisibleItemPosition + 5)
                     viewModel.next()
-                }
-
             }
         })
 
         adapter = LecturesAdapter()
             .apply { onClick = this@KmoocListActivity::startDetailActivity }
-
         binding.lectureList.adapter = adapter
 
 
@@ -67,16 +69,11 @@ class KmoocListActivity : AppCompatActivity() {
 
 
     private fun setObservers() {
-        viewModel.lectures.observe(this) {
-            adapter.updateLectures(it)
+        viewModel.lectureList.observe(this) {
+            adapter.updateLectures(it.lectures)
             binding.pullToRefresh.isRefreshing = false
-            binding.progressBar.isGone = true
         }
 
-        viewModel.processing.observe(this) {
-            binding.progressBar.isVisible = it
-
-        }
     }
 
 

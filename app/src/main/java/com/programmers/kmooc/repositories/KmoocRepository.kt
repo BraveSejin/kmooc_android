@@ -59,6 +59,7 @@ class KmoocRepository {
         val next = pagination.getString("next")
 
         val results: JSONArray = jsonObject.getJSONArray("results")
+
         val list = mutableListOf<Lecture>()
         for (i in 0 until results.length()) {
             list.add(parseLecture(results.getJSONObject(i)))
