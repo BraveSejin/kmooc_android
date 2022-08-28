@@ -48,17 +48,7 @@ class LecturesAdapter : RecyclerView.Adapter<LectureViewHolder>() {
 class LectureViewHolder(private val binding: ViewKmookListItemBinding) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(lecture: Lecture) {
-        binding.apply {
+        binding.lecture = lecture
 
-            lectureTitle.text = lecture.name
-            lectureFrom.text = lecture.orgName
-            lectureDuration.text = DateUtil.formatDueString(lecture.start, lecture.end)
-            ImageLoader.loadImage(lecture.courseImage) { bitmap ->
-                lectureImage.setImageBitmap(bitmap)
-            }
-
-        }
     }
-
-
 }
